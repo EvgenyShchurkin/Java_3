@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+<HBox xmlns="http://javafx.com/javafx/1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <children>
+      <VBox prefHeight="297.0" prefWidth="455.0" HBox.hgrow="ALWAYS">
+         <MenuBar>
+             <Menu text="Operations">
+                 <MenuItem fx:id="menuItemClear" onAction="#clearTextArea" text="Clear main text area" />
+                 <MenuItem fx:id="menuItemCopy" onAction="#cpToBuffer" text="Copy all to buffer" />
+                 <MenuItem fx:id="menuItem" onAction="#exitAction" text="Exit" />
+             </Menu>
+         </MenuBar>
+          <HBox fx:id="upperPanel" >
+              <TextField fx:id="loginField" HBox.hgrow="ALWAYS" promptText="Login"/>
+              <PasswordField fx:id="passField" HBox.hgrow="ALWAYS" promptText="Password" onAction="#tryToAuth"/>
+              <Button text="Login" onAction="#tryToAuth"/>
+          </HBox>
+      
+          <TextArea fx:id="mainTextArea" editable="false" focusTraversable="false" opacity="0.81" VBox.vgrow="ALWAYS">
+            <font>
+               <Font size="15.0" />
+            </font>
+            <effect>
+               <Lighting diffuseConstant="1.19" specularConstant="0.28" specularExponent="29.3" surfaceScale="0.45">
+                  <bumpInput>
+                     <Shadow />
+                  </bumpInput>
+                  <light>
+                     <Light.Distant>
+                        <color>
+                           <Color red="0.5756579041481018" green="0.706524133682251" blue="0.8289473652839661" />
+                        </color>
+                     </Light.Distant>
+                  </light>
+               </Lighting>
+            </effect>
+          </TextArea>
+      
+          <HBox fx:id="bottomPanel" managed="false" visible="false">
+              <TextField fx:id="sendTextField" maxWidth="Infinity" onAction="#sendMsg" promptText="Input message you want to send..." HBox.hgrow="ALWAYS">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+              </TextField>
+              <Button fx:id="sendBtn" onAction="#sendMsg" prefHeight="25.0" prefWidth="73.0" text="Send" HBox.hgrow="ALWAYS">
+               <HBox.margin>
+                  <Insets left="10.0" right="10.0" />
+               </HBox.margin>
+            </Button>
+            <padding>
+               <Insets bottom="10.0" left="5.0" right="5.0" top="10.0" />
+            </padding>
+          </HBox>
+      
+      
+      </VBox>
+      <VBox maxWidth="200.0" prefHeight="297.0" prefWidth="102.0" HBox.hgrow="ALWAYS">
+         <children>
+            <ListView VBox.vgrow="ALWAYS" />
+         </children></VBox>
+   </children>
+</HBox>
