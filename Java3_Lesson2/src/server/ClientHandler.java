@@ -4,6 +4,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClientHandler {
     Socket client;
@@ -11,7 +14,7 @@ public class ClientHandler {
     DataInputStream in;
     DataOutputStream out;
     String nickname;
-
+    List<String> blackList;
 
 
     public ClientHandler(Server server, Socket client){
@@ -24,15 +27,19 @@ public class ClientHandler {
                 try {
                     // auth login pass
                     while (true){
+                        client.setSoTimeout(20*1000);
                         String str = in.readUTF();
                         if(str.startsWith("/auth")){
                             String [] tokens = str.split(" ");
                             String nick = AuthService.getNicknameByLoginAndPassword(tokens[1],tokens[2]);
                             if(nick!=null){
                                 if(!server.isNickBusy(nick)) {
+                                    client.setSoTimeout(0);
                                     sendMsg("/authOk");
                                     setNickname(nick);
+                                    setBlacklist(nick);
                                     server.subscribe(this);
+                                    System.out.printf("Client [%s] has just connected to server\n", client.getInetAddress());
                                     break;
                                 }
                                 else {
@@ -40,6 +47,7 @@ public class ClientHandler {
                                 }
                             }
                             else{
+                                System.out.printf("Client [%s] trying to connected to server\n", client.getInetAddress());
                                 sendMsg("/AuthWrong");
                             }
                         }
@@ -53,37 +61,38 @@ public class ClientHandler {
                                 System.out.printf("Client [%s] disconnected\n", client.getInetAddress());
                                 break;
                             }
+                            if(str.startsWith("/black ")){
+                                blackListOperations(str);
+                            }
+                            if(str.equals("/getHistory")){
+                                List<String> historyList=AuthService.getHistoryListByNickname(nickname);
+                                sendMsg("----History Loaded----");
+                                for (int i = 0; i < historyList.size() ; i++) {
+                                    sendMsg(historyList.get(i));
+                                }
+                                historyList.clear();
+                            }
                         }
+
                         else if(str.startsWith("@")) {
                             String[] partsMsg = str.split(" ",2);
                             server.sendPrivateMsg(this, partsMsg[0].substring(1, partsMsg[0].length()),partsMsg[1]);
                         }
+
                         else {
                             System.out.println(str);
-                            server.broadcastMsg(nickname+": "+str);
+//                            AuthService.addRecordToDB(nickname,str);
+                            server.broadcastMsg(nickname+": "+str, this);
                         }
                     }
+                }catch (SocketTimeoutException e){
+                    System.out.println("Timeout "+client.getInetAddress());
                 }catch (IOException e) {
                     e.printStackTrace();
                 }
                 finally {
-                        try{
-                            in.close();
-                        }catch (IOException e){
-                            e.printStackTrace();
-                        }
-                        try{
-                            out.close();
-                        }catch (IOException e){
-                            e.printStackTrace();
-                        }
-                        try {
-                            client.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        server.unsubscribe(this);
-                    }
+                    closeHandler();
+                }
 
             }).start();
         }catch(IOException e){
@@ -92,12 +101,50 @@ public class ClientHandler {
 
     }
 
+    private void blackListOperations(String str) {
+        String[] partsMsg=str.split(" ");
+        if(partsMsg.length!=2){
+            sendMsg("Service message: If you want to add someone to your blacklist you need to specify " +
+                    "a username correctly after command /blacklist {username}.");
+        }
+        else {
+            partsMsg = str.split(" ", 2);
+            if(nickname.equals(partsMsg[1])){
+                sendMsg("Service message: You can't add yourself to blacklist.");
+                return;
+            }
+            if (!AuthService.getBlackListByNickname(nickname).contains(partsMsg[1])) {
+                if (AuthService.addUserToBlacklist(nickname, partsMsg[1]) == 1) {
+                    blackList.add(partsMsg[1]);
+                    sendMsg("You added user [" + partsMsg[1] + "] to blacklist");
+                } else {
+                    sendMsg("Something went wrong during adding user [" + partsMsg[1] + "] to your blacklist");
+                }
+            } else {
+                if (AuthService.deleteUserFromBlacklist(nickname, partsMsg[1]) == 1) {
+                    blackList.remove(partsMsg[1]);
+                    sendMsg("User [" + partsMsg[1] + "] not in your blacklist anymore");
+                } else {
+                    sendMsg("Something went wrong during deleting user [" + partsMsg[1] + "] from your blacklist");
+                }
+            }
+        }
+    }
+
+    private void setBlacklist(String nick) {
+        this.blackList = AuthService.getBlackListByNickname(nick);
+    }
+
+
     private void setNickname(String nick) {
         this.nickname=nick;
     }
 
     public String getNickname() {
         return nickname;
+    }
+    public List<String> getBlackList(){
+        return blackList;
     }
 
     public void sendMsg(String msg){
@@ -107,4 +154,30 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
+    public void closeHandler(){
+        try{
+            if(in!=null) {
+                in.close();
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        try{
+            if(out!=null) {
+                out.close();
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        try {
+            if(client!=null||!client.isClosed()) {
+                client.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        server.unsubscribe(this);
+    }
+
+
 }

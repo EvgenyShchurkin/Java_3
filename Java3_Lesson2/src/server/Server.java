@@ -19,7 +19,6 @@ public class Server {
             System.out.println("Server has started");
              while (true){
                  client = serverSocket.accept();
-                 System.out.printf("Client [%s] has just connected to server\n", client.getInetAddress());
                  new ClientHandler(this,client);
              }
 
@@ -27,11 +26,12 @@ public class Server {
             e.printStackTrace();
         }
         finally {
+            AuthService.disconnect();
             this.disconnect(serverSocket,client);
             }
         }
 
-    private void disconnect(ServerSocket serverSocket, Socket client){
+    public void disconnect(ServerSocket serverSocket, Socket client){
         try {
             client.close();
         } catch (IOException e) {
@@ -43,17 +43,22 @@ public class Server {
             e.printStackTrace();
         }
     }
-    public void broadcastMsg(String msg){
+    public void broadcastMsg(String msg, ClientHandler fromUser){
         for(ClientHandler client: users){
-           client.sendMsg(msg);
+            if (!fromUser.getBlackList().contains(client.getNickname()) && !client.getBlackList().contains(fromUser.getNickname())){
+                client.sendMsg(msg);
+                AuthService.addRecordToDB(fromUser.getNickname(),client.getNickname(),msg);
+            }
         }
     }
 
     public void subscribe(ClientHandler client){
         users.add(client);
+        broadcastClientsList();
     }
     public void unsubscribe(ClientHandler client){
         users.remove(client);
+        broadcastClientsList();
     }
 
     public boolean isNickBusy(String nick) {
@@ -72,11 +77,31 @@ public class Server {
         }
         for (ClientHandler clients : users) {
             if (clients.getNickname().equals(toUser)) {
-                clients.sendMsg(fromUser.getNickname() + " sent private message for you: " + message);
-                fromUser.sendMsg("You sent private message for " + toUser + ": " + message);
-                return;
+                if(!clients.getBlackList().contains(fromUser.getNickname()) && !fromUser.getBlackList().contains(clients.getNickname())) {
+                    clients.sendMsg(fromUser.getNickname() + " sent private message for you: " + message);
+                    AuthService.addRecordToDB(fromUser.getNickname(),clients.getNickname(),fromUser.getNickname() + " sent private message for you: " + message);
+                    fromUser.sendMsg("You sent private message for " + toUser + ": " + message);
+                    AuthService.addRecordToDB(fromUser.getNickname(),fromUser.getNickname(),"You sent private message for " + toUser + ": " + message);
+                    return;
+                }
+                else {
+                    fromUser.sendMsg("Message receiver ["+toUser+"] in your blacklist or he put you in his blacklist");
+                    return;
+                }
             }
         }
         fromUser.sendMsg("Warning: You're trying to send message to the user who doesn't exist");
+    }
+
+    public void broadcastClientsList(){
+        StringBuilder clients = new StringBuilder("/clients_list ");
+        for(ClientHandler c: users){
+            clients.append(c.getNickname()).append(" ");
+        }
+        clients.setLength(clients.length()-1);
+        String clientsList = clients.toString();
+        for(ClientHandler client: users){
+            client.sendMsg(clientsList);
+        }
     }
 }
