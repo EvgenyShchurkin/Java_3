@@ -23,7 +23,7 @@
               <Button text="Login" onAction="#tryToAuth"/>
           </HBox>
       
-          <TextArea fx:id="mainTextArea" editable="false" focusTraversable="false" opacity="0.81" VBox.vgrow="ALWAYS">
+          <TextArea fx:id="mainTextArea" editable="false" focusTraversable="false" opacity="0.81" VBox.vgrow="ALWAYS" wrapText="true">
             <font>
                <Font size="15.0" />
             </font>
@@ -44,7 +44,7 @@
           </TextArea>
       
           <HBox fx:id="bottomPanel" managed="false" visible="false">
-              <TextField fx:id="sendTextField" maxWidth="Infinity" onAction="#sendMsg" promptText="Input message you want to send..." HBox.hgrow="ALWAYS">
+              <TextField fx:id="sendTextField" maxWidth="Infinity" onAction="#sendMsg" promptText="Input message you want to send..." HBox.hgrow="ALWAYS" >
                <HBox.margin>
                   <Insets />
                </HBox.margin>
@@ -61,9 +61,9 @@
       
       
       </VBox>
-      <VBox maxWidth="200.0" prefHeight="297.0" prefWidth="102.0" HBox.hgrow="ALWAYS">
+      <VBox fx:id="vBox" visible="false" managed="false" maxWidth="200.0" prefHeight="297.0" prefWidth="102.0" HBox.hgrow="ALWAYS">
          <children>
-            <ListView VBox.vgrow="ALWAYS" />
+            <ListView  fx:id="userList" VBox.vgrow="ALWAYS" />
          </children></VBox>
    </children>
 </HBox>

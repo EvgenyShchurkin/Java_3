@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -24,15 +25,15 @@ public class Controller{
     @FXML
     TextArea mainTextArea;
     @FXML
-    TextField sendTextField;
+    TextField sendTextField, loginField;
     @FXML
-    HBox bottomPanel;
+    HBox bottomPanel,upperPanel;
     @FXML
-    HBox upperPanel;
-    @FXML
-    TextField loginField;
+    ListView<String> userList ;
     @FXML
     PasswordField passField;
+    @FXML
+    VBox vBox;
 
     private boolean isAuthorized;
 
@@ -44,12 +45,20 @@ public class Controller{
             upperPanel.setManaged(true);
             bottomPanel.setVisible(false);
             bottomPanel.setManaged(false);
+            userList.setManaged(false);
+            userList.setVisible(false);
+            vBox.setVisible(false);
+            vBox.setManaged(false);
         }
         else{
             upperPanel.setVisible(false);
             upperPanel.setManaged(false);
             bottomPanel.setVisible(true);
             bottomPanel.setManaged(true);
+            userList.setManaged(true);
+            userList.setVisible(true);
+            vBox.setVisible(true);
+            vBox.setManaged(true);
         }
     }
 
@@ -58,6 +67,9 @@ public class Controller{
     public void sendMsg() {
         try{
             if(!sendTextField.getText().isEmpty()) {
+                if(sendTextField.getText().equals("/getHistory")){
+                    mainTextArea.clear();
+                }
                 out.writeUTF(sendTextField.getText());
                 sendTextField.clear();
                 sendTextField.requestFocus();
@@ -88,7 +100,7 @@ public class Controller{
             client = new Socket("localhost", 8089);
             in = new DataInputStream(client.getInputStream());
             out = new DataOutputStream(client.getOutputStream());
-            new Thread(()->{
+            Thread newClient = new Thread(()->{
                 try {
                     while(true) {
                         String msg = in.readUTF();
@@ -97,6 +109,7 @@ public class Controller{
                             setAuthorized(true);
                             break;
                         }
+
                         else {
                             mainTextArea.appendText(msg + "\n");
                         }
@@ -107,7 +120,19 @@ public class Controller{
                         if("/ServerClosed".equals(msg)){
                             break;
                         }
-                        mainTextArea.appendText(msg+"\n");
+                        else if(msg.startsWith("/clients_list")){
+                            String[] tokens = msg.split(" ");
+                            Platform.runLater(()->{
+                                userList.getItems().clear();
+                                for (int i= 1;i<tokens.length;i++){
+                                    userList.getItems().add(tokens[i]);
+                                }
+                            });
+
+                        }
+                        else {
+                            mainTextArea.appendText(msg + "\n");
+                        }
                     }
                 }catch (IOException e){
                     e.printStackTrace();
@@ -120,7 +145,8 @@ public class Controller{
                     }
                     setAuthorized(false);
                 }
-            }).start();
+            });
+            newClient.start();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -143,13 +169,22 @@ public class Controller{
     }
     public void disconnect(){
         try{
-            out.writeUTF("/end");
+            if(client!=null) {
+                out.writeUTF("/end");
+            }
         }catch (IOException e){
             e.printStackTrace();
         }
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         try {
-            client.close();
-        }catch (IOException e){
+            if(client!=null ) {
+                client.close();
+            }
+        }catch (IOException | NullPointerException e){
             e.printStackTrace();
         }
     }
