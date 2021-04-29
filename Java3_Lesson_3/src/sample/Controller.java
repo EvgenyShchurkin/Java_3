@@ -14,13 +14,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
-import java.util.ResourceBundle;
+
 
 public class Controller{
     private Socket client;
     private DataInputStream in;
     private DataOutputStream out;
+    private String nickname;
 
     @FXML
     TextArea mainTextArea;
@@ -104,9 +104,17 @@ public class Controller{
                 try {
                     while(true) {
                         String msg = in.readUTF();
-                        if("/authOk".equals(msg)){
+                        String []tokens= msg.split(" ", 2);
+                        if("/authOk".equals(tokens[0])){
+                            setNickname(tokens[1]);
                             mainTextArea.clear();
                             setAuthorized(true);
+//                            if(FileServices.getHistoryFromFile(getNickname(),3)!=null) {
+//                                mainTextArea.appendText(FileServices.getHistoryFromFile(getNickname(), 10));
+//                            }
+                            if(FileServices.getLastMessages(5, getNickname())!=null) {
+                                mainTextArea.appendText(FileServices.getLastMessages(5, getNickname()));
+                            }
                             break;
                         }
 
@@ -131,7 +139,8 @@ public class Controller{
 
                         }
                         else {
-                            mainTextArea.appendText(msg + "\n");
+                            FileServices.writeHistory(msg, nickname);
+                            mainTextArea.appendText(msg+"\n");
                         }
                     }
                 }catch (IOException e){
@@ -155,6 +164,13 @@ public class Controller{
 
     }
 
+    private void setNickname(String nickname) {
+        this.nickname=nickname;
+    }
+    private String getNickname(){
+        return this.nickname;
+    }
+
     public void tryToAuth(ActionEvent actionEvent) {
         if(client == null || client.isClosed()){
             connect();
@@ -167,25 +183,23 @@ public class Controller{
             e.printStackTrace();
         }
     }
-    public void disconnect(){
-        try{
-            if(client!=null) {
+    public void disconnect() {
+        if (client != null ) {
+            try {
                 out.writeUTF("/end");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }catch (IOException e){
-            e.printStackTrace();
+            try {
+                if (client != null) {
+                    client.close();
+                }
+            } catch (IOException | NullPointerException e) {
+                e.printStackTrace();
+            }
         }
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-        try {
-            if(client!=null ) {
-                client.close();
-            }
-        }catch (IOException | NullPointerException e){
-            e.printStackTrace();
+        else {
+            Platform.exit();
         }
     }
 }

@@ -35,7 +35,7 @@ public class ClientHandler {
                             if(nick!=null){
                                 if(!server.isNickBusy(nick)) {
                                     client.setSoTimeout(0);
-                                    sendMsg("/authOk");
+                                    sendMsg("/authOk " +nick);
                                     setNickname(nick);
                                     setBlacklist(nick);
                                     server.subscribe(this);
@@ -48,7 +48,7 @@ public class ClientHandler {
                             }
                             else{
                                 System.out.printf("Client [%s] trying to connected to server\n", client.getInetAddress());
-                                sendMsg("/AuthWrong");
+                                sendMsg("/Auth Wrong");
                             }
                         }
                     }
@@ -71,6 +71,12 @@ public class ClientHandler {
                                     sendMsg(historyList.get(i));
                                 }
                                 historyList.clear();
+                            }
+                            if (str.startsWith("/getBlack")){
+                                sendMsg("Your blacklist: ");
+                                for (int i = 0; i < blackList.size() ; i++) {
+                                    sendMsg(blackList.get(i));
+                                }
                             }
                         }
 
