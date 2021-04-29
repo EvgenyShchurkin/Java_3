@@ -7,6 +7,9 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler {
     Socket client;
@@ -15,6 +18,8 @@ public class ClientHandler {
     DataOutputStream out;
     String nickname;
     List<String> blackList;
+    ExecutorService exService;
+
 
 
     public ClientHandler(Server server, Socket client){
@@ -23,7 +28,9 @@ public class ClientHandler {
             this.client = client;
             in = new DataInputStream(client.getInputStream());
             out = new DataOutputStream(client.getOutputStream());
-            new Thread(()->{
+            exService=Executors.newSingleThreadExecutor();
+
+            exService.execute(()->{
                 try {
                     // auth login pass
                     while (true){
@@ -100,11 +107,11 @@ public class ClientHandler {
                     closeHandler();
                 }
 
-            }).start();
+            });
+            exService.shutdown();
         }catch(IOException e){
             e.printStackTrace();
         }
-
     }
 
     private void blackListOperations(String str) {
