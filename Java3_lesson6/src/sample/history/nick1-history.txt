@@ -1,0 +1,11 @@
+nick1: fjfjfj
+nick1: ghghgh
+nick3: ghghgh
+nick3: ghghgh
+nick1: ff
+nick3: hello
+nick1: ghghg
+nick1: привет
+nick1: ку
+nick1: ку
+nick3: reee
