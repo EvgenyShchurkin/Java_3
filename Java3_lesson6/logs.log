@@ -1,0 +1,18 @@
+2021-05-06 17:31:09 DEBUG Server:23 - Server has started
+2021-05-06 17:41:48 DEBUG Server:23 - Server has started
+2021-05-06 17:42:06 DEBUG Server:46 - Server send: /authOk tonick1
+2021-05-06 17:42:06 DEBUG Server:51 - Client /127.0.0.1 has just connected to server
+2021-05-06 18:16:03 DEBUG Server:23 - Server has started
+2021-05-06 18:16:12 DEBUG Server:61 - Client /127.0.0.1 with nickname [ nick1 ] connected and authenticated
+2021-05-06 18:16:43 DEBUG Server:61 - Client /127.0.0.1 with nickname [ nick3 ] connected and authenticated
+2021-05-06 18:17:00 DEBUG Server:66 - Client /127.0.0.1 with nickname [ nick3 ] disconnected from the server
+2021-05-06 18:17:11 DEBUG Server:61 - Client /127.0.0.1 with nickname [ nick3 ] connected and authenticated
+2021-05-06 18:17:45 DEBUG Server:66 - Client /127.0.0.1 with nickname [ nick3 ] disconnected from the server
+2021-05-06 18:17:48 DEBUG Server:66 - Client /127.0.0.1 with nickname [ nick1 ] disconnected from the server
+2021-05-06 18:28:56 DEBUG Server:23 - Server has started
+2021-05-06 18:29:06 DEBUG Server:61 - Client /127.0.0.1 with nickname [ nick1 ] connected and authenticated
+2021-05-06 18:29:06 DEBUG Server:63 - User list updated because client with nickname [nick1] logged in
+2021-05-06 18:29:14 DEBUG Server:61 - Client /127.0.0.1 with nickname [ nick3 ] connected and authenticated
+2021-05-06 18:29:14 DEBUG Server:63 - User list updated because client with nickname [nick3] logged in
+2021-05-06 18:29:30 DEBUG Server:135 - User nick3 added nick1 to his blacklist
+2021-05-06 18:29:44 DEBUG Server:144 - User nick3 deleted nick1 from his blacklist
