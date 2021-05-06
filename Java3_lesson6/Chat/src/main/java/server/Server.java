@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.util.Vector;
 
 public class Server {
-
+    private static final Logger LOGGER = Logger.getLogger(Server.class);
     private Vector<ClientHandler> users;
 
     public Server() {
@@ -20,7 +20,7 @@ public class Server {
             AuthService.connect();
             serverSocket = new ServerSocket(8089);
             System.out.println("Server has started");
-
+            LOGGER.debug("Server has started");
              while (true){
                  client = serverSocket.accept();
                  new ClientHandler(this,client);
@@ -58,11 +58,15 @@ public class Server {
 
     public void subscribe(ClientHandler client){
         users.add(client);
+        LOGGER.debug("Client "+client.getClientIPAddress()+" with nickname [ "+client.getNickname()+" ] connected and authenticated");
         broadcastClientsList();
+        LOGGER.debug("User list updated because client with nickname ["+client.getNickname()+"] logged in");
     }
     public void unsubscribe(ClientHandler client){
         users.remove(client);
+        LOGGER.debug("Client "+client.getClientIPAddress()+" with nickname [ "+client.getNickname()+" ] disconnected from the server");
         broadcastClientsList();
+        LOGGER.debug("User list updated because client with nickname ["+client.getNickname()+"] logged out");
     }
 
     public boolean isNickBusy(String nick) {
@@ -108,6 +112,8 @@ public class Server {
             client.sendMsg(clientsList);
         }
     }
-
+     public Logger getLogger(){
+        return LOGGER;
+     }
 
 }

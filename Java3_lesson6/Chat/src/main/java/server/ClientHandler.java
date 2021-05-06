@@ -3,6 +3,7 @@ package server;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
@@ -131,15 +132,19 @@ public class ClientHandler {
                 if (AuthService.addUserToBlacklist(nickname, partsMsg[1]) == 1) {
                     blackList.add(partsMsg[1]);
                     sendMsg("You added user [" + partsMsg[1] + "] to blacklist");
+                    server.getLogger().debug("User "+nickname+" added "+partsMsg[1]+" to his blacklist");
                 } else {
                     sendMsg("Something went wrong during adding user [" + partsMsg[1] + "] to your blacklist");
+                    server.getLogger().debug("Something went wrong during addition user [" + partsMsg[1] + "] to blacklist of "+nickname);
                 }
             } else {
                 if (AuthService.deleteUserFromBlacklist(nickname, partsMsg[1]) == 1) {
                     blackList.remove(partsMsg[1]);
                     sendMsg("User [" + partsMsg[1] + "] not in your blacklist anymore");
+                    server.getLogger().debug("User "+nickname+" deleted "+partsMsg[1]+" from his blacklist");
                 } else {
                     sendMsg("Something went wrong during deleting user [" + partsMsg[1] + "] from your blacklist");
+                    server.getLogger().debug("Something went wrong during deletion user [" + partsMsg[1] + "] from blacklist of "+nickname);
                 }
             }
         }
@@ -191,6 +196,9 @@ public class ClientHandler {
             e.printStackTrace();
         }
         server.unsubscribe(this);
+    }
+    public InetAddress getClientIPAddress(){
+        return client.getInetAddress();
     }
 
 

@@ -9,3 +9,5 @@ nick2: ghghgh
 nick1: ку
 nick1: ку
 nick3: reee
+You added user [nick1] to blacklist
+User [nick1] not in your blacklist anymore
