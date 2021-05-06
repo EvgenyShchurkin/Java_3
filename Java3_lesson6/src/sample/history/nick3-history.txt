@@ -8,3 +8,4 @@ nick1: ghghg
 nick2: ghghgh
 nick1: ку
 nick1: ку
+nick3: reee
